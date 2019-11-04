@@ -1,7 +1,7 @@
 import typing
 import asyncio
 
-from tornado.queues import Queue, QueueEmpty
+from asyncio.queues import Queue, QueueEmpty
 from tornado.httpclient import AsyncHTTPClient, HTTPClientError
 
 from media_downloader.infrastructure.crawling_lib.httplib import Request, Response, FileRequest, FileResponse
