@@ -5,6 +5,7 @@ from media_downloader.infrastructure.crawling_lib import Downloader
 from media_downloader.infrastructure.crawling_lib import Request, FileRequest
 from media_downloader.infrastructure.async_manager import AsyncManager
 
+
 class TestDownloader(unittest.TestCase):
 
     def setUp(self) -> None:

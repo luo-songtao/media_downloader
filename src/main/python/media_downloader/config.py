@@ -8,6 +8,6 @@ LOG_FORMAT = "%(asctime)s [%(levelname)s]: %(message)s"
 LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 """ crawling_lib running config """
-MAX_REQUEST_QUEUE_SIZE = int(os.environ.get("MAX_REQUEST_QUEUE_SIZE", 1000))
-MAX_CONCURRENT_COUNT = int(os.environ.get("MAX_CONCURRENT_COUNT", 10))
-PER_BATCH_REQUEST_DELAY_TIME = int(os.environ.get("PER_BATCH_REQUEST_DELAY_TIME", 0))
+REQUEST_QUEUE_MAX_SIZE = int(os.environ.get("REQUEST_QUEUE_MAX_SIZE", 1000))
+MAX_CONCURRENT_NUMBER = int(os.environ.get("MAX_CONCURRENT_NUMBER", 10))
+DEFAULT_DELAY = int(os.environ.get("DEFAULT_DELAY", 0))

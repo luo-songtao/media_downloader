@@ -7,7 +7,6 @@ from tornado.httpclient import AsyncHTTPClient, HTTPClientError
 from media_downloader.infrastructure.crawling_lib.httplib import Request, Response, FileRequest, FileResponse
 from media_downloader.infrastructure.dependency_injection import Metaclass
 from media_downloader.infrastructure.log import log
-from media_downloader import config
 
 AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
 
@@ -17,12 +16,12 @@ class Downloader(metaclass=Metaclass):
 
     __polling_interval = 0.0001    # 轮询暂停间隔，防止CPU进行空循环
 
-    def __init__(self):
+    def __init__(self, request_queue_max_size: int=1000, concurrent_number: int=1, delay: int=0):
         self.http_client = AsyncHTTPClient()
 
-        self.request_queue = Queue(config.MAX_REQUEST_QUEUE_SIZE)  # 请求队列
-        self.max_concurrent_count = config.MAX_CONCURRENT_COUNT  # 请求最大并发数
-        self.delay = config.PER_BATCH_REQUEST_DELAY_TIME  # 每批请求之间的延时
+        self.request_queue = Queue(request_queue_max_size)  # 请求队列
+        self.concurrent_number = concurrent_number  # 请求最大并发数
+        self.delay = delay  # 每批请求之间的延时
         self.is_running = False  # 记录采集器的运行状态
         self.pushed_request_count = 0  # 记录采集器队列中已经添加的请求数量
         self.failed_request_count = 0  # 记录失败的请求数量
