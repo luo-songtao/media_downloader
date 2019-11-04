@@ -102,3 +102,15 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# pycharm
+.idea/
+
+### Node ###
+node_modules/
+yarn-error.log
+
+*.log
+
+.DS_Store
+*/.DS_Store

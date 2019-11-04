@@ -1,0 +1,5 @@
+version: '3'
+services:
+  meida-downloader-service:
+    build: .
+    image: meida-downloader
