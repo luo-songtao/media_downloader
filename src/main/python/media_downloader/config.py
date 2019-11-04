@@ -11,3 +11,8 @@ LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 REQUEST_QUEUE_MAX_SIZE = int(os.environ.get("REQUEST_QUEUE_MAX_SIZE", 1000))
 MAX_CONCURRENT_NUMBER = int(os.environ.get("MAX_CONCURRENT_NUMBER", 10))
 DEFAULT_DELAY = int(os.environ.get("DEFAULT_DELAY", 0))
+
+
+ROOT_STORAGE_DIR = "/download"
+if not os.path.exists(ROOT_STORAGE_DIR):
+    os.mkdir(ROOT_STORAGE_DIR)

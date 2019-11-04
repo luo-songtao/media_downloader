@@ -22,7 +22,7 @@ class DownloaderManager(metaclass=Metaclass):
             downloader = self.downloaders[crawler.name]
         else:
             downloader = Downloader(
-                request_queue_max_size=crawler.downloader_params.get("concurrent_number", config.REQUEST_QUEUE_MAX_SIZE),
+                request_queue_max_size=crawler.downloader_params.get("request_queue_max_size", config.REQUEST_QUEUE_MAX_SIZE),
                 concurrent_number=crawler.downloader_params.get("concurrent_number", config.MAX_CONCURRENT_NUMBER),
                 delay=crawler.downloader_params.get("delay", config.DEFAULT_DELAY)
             )
