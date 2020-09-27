@@ -23,6 +23,8 @@ class DownloadingService(metaclass=Metaclass):
         self.QUIT = False
 
     def get_running_messages(self):
+        pending_count = 0
+        running_count = 0
         msgs = []
         for crawler_name, downloader in self.downloader_manager.downloaders.items():
             status = "Running" if downloader.is_running else "Not Running"

@@ -1,9 +1,5 @@
 version: '3'
 services:
-  media-downloader-service:
+  meida-downloader-service:
     build: .
-    image: media-downloader
-    volumes: 
-      - ./projects:/code
-      - ./download:/download
-    command: python run.py
+    image: meida-downloader
