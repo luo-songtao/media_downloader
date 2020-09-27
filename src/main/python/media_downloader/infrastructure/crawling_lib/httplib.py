@@ -44,6 +44,9 @@ class Request(HTTPRequest):
         self.path = temp.path
         self.scheme = temp.scheme
 
+    def __repr__(self):
+        return self.url
+
 
 class FileRequest(Request):
 
