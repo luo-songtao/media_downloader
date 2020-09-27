@@ -47,6 +47,7 @@ class Request(HTTPRequest):
     def __repr__(self):
         return self.url
 
+
 class FileRequest(Request):
 
     def __init__(self, url, callback, file_path, *args, **kwargs):

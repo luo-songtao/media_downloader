@@ -7,4 +7,3 @@ services:
       - ./projects:/code
       - ./download:/download
     command: python run.py
-
