@@ -27,6 +27,7 @@ DOWNLOADERS = {
 '''
 default config
 '''
+import os
 
 """ log config """
 LOG_NAME = "LOG"
