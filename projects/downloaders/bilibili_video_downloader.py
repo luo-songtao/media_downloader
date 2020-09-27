@@ -1,15 +1,11 @@
+# -*- coding:utf-8 -*-
+# @Author: Luo Songtao
+# @Email: ryomawithlst@outlook.com
 import re
 import os
-import time
 import json
 import typing
-import hashlib
-import asyncio
-import calendar
-from datetime import datetime
-from copy import copy, deepcopy
-
-import ffmpeg
+from copy import deepcopy
 
 from media_downloader.application.crawler import AbstractCrawler
 from media_downloader.infrastructure.crawling_lib import Request, FileRequest
@@ -17,17 +13,9 @@ from media_downloader.infrastructure.log import log
 from media_downloader import config
 
 
-def nextmonth(year, month):
-    if month == 12:
-        return year+1, 1
-    else:
-        return year, month+1
+class BilibiliVideoDownloader(AbstractCrawler):
 
-
-class BilibiliVideoCrawler(AbstractCrawler):
-
-
-    name = "bilibili-video-crawler"
+    name = "bilibili-video-downloader"
 
     list_headers = {
         "Referer": "https://www.bilibili.com/v/life/funny/",
@@ -62,6 +50,8 @@ class BilibiliVideoCrawler(AbstractCrawler):
     video_codecs = "avc1"
 
     av_base_url = "https://www.bilibili.com/video/av{}/"
+    
+    bv_base_url = "https://www.bilibili.com/video/BV{}/"
 
     def parse_crawler_params(self, crawler_params):
         # 缓存文件夹，用于临时存储媒体文件
@@ -79,6 +69,7 @@ class BilibiliVideoCrawler(AbstractCrawler):
 
         self.crawling_type = crawler_params.get("type")    # by_av|by_up_master
         self.av_number = crawler_params.get("av")
+        self.bv_number = crawler_params.get("bv")
         self.up_master_id = crawler_params.get("up_master_id")
 
     async def generate_initial_requests(self) -> typing.AsyncGenerator:
@@ -93,7 +84,19 @@ class BilibiliVideoCrawler(AbstractCrawler):
                 # proxy_username=PROXY_USERNAME,
                 # proxy_password=PROXY_PASSWORD,
             )
-
+            
+        if self.crawling_type == "by_bv":
+            yield Request(
+                url=self.bv_base_url.format(self.bv_number),
+                headers=self.detail_headers,
+                callback=self.detail_callback,
+                metadata={"base_storage_dir": self.base_storage_dir, "av_number": self.av_number}
+                # proxy_host=PROXY_HOST,
+                # proxy_port=PROXY_PORT,
+                # proxy_username=PROXY_USERNAME,
+                # proxy_password=PROXY_PASSWORD,
+            )            
+            
     async def detail_callback(self, response):
         media_headers = deepcopy(self.media_headers)
         media_headers["Referer"] = response.request.url  # 设置media下载请求头的Referer地址
@@ -116,8 +119,8 @@ class BilibiliVideoCrawler(AbstractCrawler):
                 log.warning("详情页解析失败: <{}>[{}]".format(response.code, response.request.url))
             else:
                 videoData = json.loads(_videoData.group(1))
-
-                storage_dir = os.path.join(metadata["base_storage_dir"], "av{}-{}".format(metadata["av_number"], videoData["title"].replace("/", "-").replace(" ", "")))
+                videoData["title"] = re.sub("\W", "-", videoData["title"])
+                storage_dir = os.path.join(metadata["base_storage_dir"], "{}-{}".format(videoData["title"], metadata["av_number"]))
                 if not os.path.exists(storage_dir):
                     os.mkdir(storage_dir)
                 metadata["storage_dir"] = storage_dir
@@ -126,7 +129,7 @@ class BilibiliVideoCrawler(AbstractCrawler):
                 if len(pages) == 1:
                     url = content_base_url.format(aid=videoData["aid"], cid=videoData["cid"])
                     metadata["DIRECTLY_PARSING"] = "标示该请求是通过提取 videoData 中的 aid 和 cid 来发起单独的请求解析到 JSON Content 的"
-                    metadata["video_name"] = videoData["title"].replace("/", "-").replace(" ", "")
+                    metadata["video_name"] = videoData["title"]
                     metadata["id"] = "{}-{}".format(videoData["aid"], videoData["cid"])
                     yield Request(
                         url,
@@ -139,11 +142,16 @@ class BilibiliVideoCrawler(AbstractCrawler):
                         # proxy_password=PROXY_PASSWORD,
                     )
                 else:
+                    downloaded_pages = [int(name.split("-")[0]) for name in os.listdir(storage_dir) if not name.startswith(".")]
                     for page in pages:
+                        # if int(page["page"]) not in [57]:
+                        #     continue
+                        if int(page["page"]) in downloaded_pages:
+                            continue
                         url = content_base_url.format(aid=videoData["aid"], cid=page["cid"])
                         metadata[
                             "DIRECTLY_PARSING"] = "标示该请求是通过提取 videoData 中的 aid 和 cid 来发起单独的请求解析到 JSON Content 的"
-                        metadata["video_name"] = "{}-{}".format(page["page"], page["part"].replace("/", "-").replace(" ", ""))
+                        metadata["video_name"] = "{}-{}".format(page["page"], re.sub("\W", "-", page["part"]))
                         metadata["id"] = "{}-{}".format(videoData["aid"], page["cid"])
                         yield Request(
                             url,
@@ -233,13 +241,13 @@ class BilibiliVideoCrawler(AbstractCrawler):
         file_path = response.request.file_path
         metadata = response.request.metadata
         if file_path.endswith("video.flv"):
-            order = file_path.split("/")[-1][0]
+            order = file_path.split("/")[-1].split("-")[0]
             log.info("视频片段[{}]下载完毕: AV<{}>".format(order, metadata["id"]))
             self.old_version_records[metadata["id"]]["fragments"].append(file_path)
 
         if len(self.old_version_records[metadata["id"]]["fragments"]) == len(metadata["video_info"]):
             fragments_path = self.old_version_records[metadata["id"]]["fragments"]
-            fragments_path = sorted(fragments_path, key=lambda x: int(x.split("/")[-1][0]))
+            fragments_path = sorted(fragments_path, key=lambda x: int(x.split("/")[-1].split("-")[0]))
 
             ts_path_list = []
             for fragment_path in fragments_path:

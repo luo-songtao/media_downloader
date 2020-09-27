@@ -1,5 +1,5 @@
-from .infrastructure.dependency_injection import Mapper
-from .infrastructure.log import log
+from media_downloader.infrastructure.dependency_injection import Mapper
+from media_downloader.infrastructure.log import log
 
 
 class InversionOfController(object):

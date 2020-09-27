@@ -1,10 +1,11 @@
 version: '3'
 services:
-  media-downloader-service:
+  test-media-downloader-service:
     build: .
     image: media-downloader
     volumes: 
       - ./projects:/code
       - ./download:/download
-    command: python run.py
+    working_dir: /root/sources/test/python
+    command: python test.py
 
